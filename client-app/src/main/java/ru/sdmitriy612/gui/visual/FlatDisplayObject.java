@@ -17,25 +17,22 @@ import java.util.Objects;
  * managing its animatable properties and animations.
  */
 public class FlatDisplayObject {
-    public Flat flat; // The current Flat object
-    // Previous values to detect changes
+    public Flat flat;
     private double prevX, prevY;
     private Float prevArea;
 
-    public final DoubleProperty alphaProperty = new SimpleDoubleProperty(1.0); // Opacity
-    public final DoubleProperty scaleProperty = new SimpleDoubleProperty(1.0); // Object scale (for appear/disappear/pulsation)
-    public final DoubleProperty currentX = new SimpleDoubleProperty(); // For X movement animation
-    public final DoubleProperty currentY = new SimpleDoubleProperty(); // For Y movement animation
+    public final DoubleProperty alphaProperty = new SimpleDoubleProperty(1.0);
+    public final DoubleProperty scaleProperty = new SimpleDoubleProperty(1.0);
+    public final DoubleProperty currentX = new SimpleDoubleProperty();
+    public final DoubleProperty currentY = new SimpleDoubleProperty();
 
-    // References to active Timelines to stop them if needed
     private Timeline moveTimeline;
     private Timeline pulseTimeline;
-    private Timeline visibilityTimeline; // For appear/disappear
+    private Timeline visibilityTimeline;
 
-    // Constants for drawing and animation (moved from FlatCanvas, specific to display object)
-    private static final Duration ANIMATION_DURATION = Duration.millis(500); // General animation duration (fade in/out)
-    private static final Duration MOVE_ANIMATION_DURATION = Duration.millis(400); // Duration for movement animation
-    private static final Duration PULSE_ANIMATION_DURATION = Duration.millis(300); // Duration for pulsation animation
+    private static final Duration ANIMATION_DURATION = Duration.millis(500);
+    private static final Duration MOVE_ANIMATION_DURATION = Duration.millis(400);
+    private static final Duration PULSE_ANIMATION_DURATION = Duration.millis(300);
     public static final double MIN_FLAT_RADIUS = 5;
     public static final double BASE_RADIUS_MULTIPLIER = 0.5;
 
@@ -48,7 +45,6 @@ public class FlatDisplayObject {
      */
     public FlatDisplayObject(Flat flat) {
         this.flat = flat;
-        // Initialize current and previous values
         this.currentX.set(flat.getCoordinates().x());
         this.currentY.set(flat.getCoordinates().y());
         this.prevX = flat.getCoordinates().x();
@@ -66,12 +62,10 @@ public class FlatDisplayObject {
         boolean coordsChanged = newFlat.getCoordinates().x() != prevX || newFlat.getCoordinates().y() != prevY;
         boolean areaChanged = !Objects.equals(newFlat.getArea(), prevArea);
 
-        this.flat = newFlat; // Update reference to the current Flat
+        this.flat = newFlat;
 
-        // Stop all previous animations for this object to avoid conflicts
         if (moveTimeline != null) moveTimeline.stop();
         if (pulseTimeline != null) pulseTimeline.stop();
-        // visibilityTimeline usually doesn't need to be stopped as it's a one-time animation for appear/disappear
 
         if (coordsChanged) {
             moveTimeline = new Timeline(
@@ -84,14 +78,11 @@ public class FlatDisplayObject {
             prevX = newFlat.getCoordinates().x();
             prevY = newFlat.getCoordinates().y();
         } else {
-            // If coordinates haven't changed but were animated, reset currentX/Y
-            // to the current world coordinates to prevent shifts from old animations.
             currentX.set(newFlat.getCoordinates().x());
             currentY.set(newFlat.getCoordinates().y());
         }
 
         if (areaChanged) {
-            // Scale pulsation
             pulseTimeline = new Timeline(
                     new KeyFrame(Duration.ZERO, new KeyValue(scaleProperty, 1.0)),
                     new KeyFrame(PULSE_ANIMATION_DURATION.divide(2), new KeyValue(scaleProperty, 1.2, Interpolator.EASE_OUT)),
@@ -100,14 +91,11 @@ public class FlatDisplayObject {
             pulseTimeline.play();
             prevArea = newFlat.getArea();
         } else {
-            // If area hasn't changed, ensure scaleProperty is 1.0
-            // (unless it's being animated for appearance/disappearance).
             if (visibilityTimeline == null || visibilityTimeline.getStatus() == Timeline.Status.STOPPED) {
                 scaleProperty.set(1.0);
             }
         }
-        // Ensure alphaProperty for an existing object is 1.0
-        // (unless it's being animated for appearance/disappearance).
+
         if (visibilityTimeline == null || visibilityTimeline.getStatus() == Timeline.Status.STOPPED) {
             alphaProperty.set(1.0);
         }
@@ -135,10 +123,9 @@ public class FlatDisplayObject {
      * @param onFinished A {@link Runnable} to execute once the disappearance animation is complete.
      */
     public void animateOut(Runnable onFinished) {
-        // Stop all other animations as the object will be removed
         if (moveTimeline != null) moveTimeline.stop();
         if (pulseTimeline != null) pulseTimeline.stop();
-        if (visibilityTimeline != null) visibilityTimeline.stop(); // Stop if still appearing
+        if (visibilityTimeline != null) visibilityTimeline.stop();
 
         visibilityTimeline = new Timeline(
                 new KeyFrame(ANIMATION_DURATION,
@@ -160,7 +147,6 @@ public class FlatDisplayObject {
     public static Color colorFromId(long id) {
         final double GOLDEN_ANGLE_DEG = 137.508;
         double hue = (id * GOLDEN_ANGLE_DEG) % 360;
-        if (hue < 0) hue += 360;
 
         double saturation = 0.65;
         double brightness = 0.85;

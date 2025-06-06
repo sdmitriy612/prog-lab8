@@ -4,7 +4,6 @@ import ru.sdmitriy612.clientapp.Session;
 import ru.sdmitriy612.clientapp.commands.ClientCommandsMap;
 import ru.sdmitriy612.clientapp.commands.Command;
 import ru.sdmitriy612.collection.flat.FlatBuilder;
-import ru.sdmitriy612.gui.filters.FlatFilter;
 import ru.sdmitriy612.interactors.*;
 import ru.sdmitriy612.io.StringIOController;
 

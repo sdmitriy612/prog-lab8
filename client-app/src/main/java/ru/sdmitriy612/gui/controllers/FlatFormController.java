@@ -48,7 +48,7 @@ public class FlatFormController {
         try {
             FlatBuilder builder = new FlatBuilder();
 
-            builder.setName(nameField.getText()); // без trim(), пробелы сохраняем
+            builder.setName(nameField.getText().trim());
             builder.setArea(Float.parseFloat(areaField.getText()));
             builder.setNumberOfRooms(Integer.parseInt(roomsField.getText()));
 

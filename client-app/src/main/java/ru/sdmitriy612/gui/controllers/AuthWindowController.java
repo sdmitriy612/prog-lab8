@@ -35,7 +35,6 @@ public class AuthWindowController {
         String password = passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            messageLabel.setText("Пожалуйста, заполните все поля");
             return;
         }
         String hashedPwd = HashSha512.hash(password);
@@ -48,7 +47,6 @@ public class AuthWindowController {
             messageLabel.setText(response.message());
         }
     }
-
 
     private void closeWindow() {
         Stage stage = (Stage) usernameField.getScene().getWindow();

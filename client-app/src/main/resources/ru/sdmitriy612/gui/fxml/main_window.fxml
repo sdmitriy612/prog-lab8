@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ru.sdmitriy612.gui.controllers.MainController"
-            style="-fx-font-family: 'Segoe UI';"
-            fx:id="mainPane">
+<?import javafx.geometry.Insets?> <BorderPane xmlns:fx="http://javafx.com/fxml"
+                                              fx:controller="ru.sdmitriy612.gui.controllers.MainController"
+                                              style="-fx-font-family: 'Segoe UI';"
+                                              fx:id="mainPane">
 
     <top>
         <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_LEFT">
-            <Label text="Пользователь:"/>
+            <Label fx:id="languageLabel" text="%userLabel"/>
             <Label fx:id="currentUserLabel" text="user123" style="-fx-font-weight: bold;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Выйти" onAction="#onCommand" userData="exit"/>
-        </HBox>
+            <Region HBox.hgrow="ALWAYS"/> <Label text="%language"/> <ChoiceBox fx:id="languageChoiceBox" prefWidth="120" /> <Button fx:id="exitButton" text="%exitButton" onAction="#onExit"/> </HBox>
     </top>
 
     <center>
@@ -21,22 +18,22 @@
             <items>
                 <VBox spacing="5" style="-fx-padding: 10;" prefWidth="600">
                     <VBox>
-                        <Label text="Фильтры" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Label fx:id="filtersLabel" text="%filtersLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
                         <HBox spacing="5" style="-fx-padding: 5;" alignment="CENTER_LEFT">
-                            <TextField fx:id="filterIdField" promptText="ID"/>
-                            <TextField fx:id="filterNameField" promptText="Name"/>
-                            <TextField fx:id="filterXField" promptText="X"/>
-                            <TextField fx:id="filterYField" promptText="Y"/>
-                            <TextField fx:id="filterCreationField" promptText="Creation Date"/>
-                            <TextField fx:id="filterAreaField" promptText="Area"/>
-                            <TextField fx:id="filterRoomsField" promptText="Rooms"/>
-                            <TextField fx:id="filterFurnishField" promptText="Furnish"/>
-                            <TextField fx:id="filterViewField" promptText="View"/>
-                            <TextField fx:id="filterTransportField" promptText="Transport"/>
-                            <TextField fx:id="filterHouseNameField" promptText="House Name"/>
-                            <TextField fx:id="filterHouseYearField" promptText="House Year"/>
-                            <TextField fx:id="filterHouseLiftsField" promptText="House Num Of Lifts"/>
-                            <TextField fx:id="filterOwnerIdField" promptText="Owner ID"/>
+                            <TextField fx:id="filterIdField" promptText="%idPrompt"/>
+                            <TextField fx:id="filterNameField" promptText="%namePrompt"/>
+                            <TextField fx:id="filterXField" promptText="%xPrompt"/>
+                            <TextField fx:id="filterYField" promptText="%yPrompt"/>
+                            <TextField fx:id="filterCreationField" promptText="%creationDatePrompt"/>
+                            <TextField fx:id="filterAreaField" promptText="%areaPrompt"/>
+                            <TextField fx:id="filterRoomsField" promptText="%roomsPrompt"/>
+                            <TextField fx:id="filterFurnishField" promptText="%furnishPrompt"/>
+                            <TextField fx:id="filterViewField" promptText="%viewPrompt"/>
+                            <TextField fx:id="filterTransportField" promptText="%transportPrompt"/>
+                            <TextField fx:id="filterHouseNameField" promptText="%houseNamePrompt"/>
+                            <TextField fx:id="filterHouseYearField" promptText="%houseYearPrompt"/>
+                            <TextField fx:id="filterHouseLiftsField" promptText="%houseLiftsPrompt"/>
+                            <TextField fx:id="filterOwnerIdField" promptText="%ownerIdPrompt"/>
                         </HBox>
                     </VBox>
 
@@ -44,98 +41,98 @@
                         <items>
                             <TableView fx:id="flatsTable">
                                 <columns>
-                                    <TableColumn text="ID" prefWidth="50"/>
-                                    <TableColumn text="Name" prefWidth="120"/>
-                                    <TableColumn text="X" prefWidth="60"/>
-                                    <TableColumn text="Y" prefWidth="60"/>
-                                    <TableColumn text="Creation Date" prefWidth="120"/>
-                                    <TableColumn text="Area" prefWidth="60"/>
-                                    <TableColumn text="Rooms" prefWidth="60"/>
-                                    <TableColumn text="Furnish" prefWidth="80"/>
-                                    <TableColumn text="View" prefWidth="80"/>
-                                    <TableColumn text="Transport" prefWidth="80"/>
-                                    <TableColumn text="House Name" prefWidth="160"/>
-                                    <TableColumn text="House Year" prefWidth="80"/>
-                                    <TableColumn text="Lifts" prefWidth="50"/>
+                                    <TableColumn text="%columnId" prefWidth="50"/>
+                                    <TableColumn text="%columnName" prefWidth="120"/>
+                                    <TableColumn text="%columnX" prefWidth="60"/>
+                                    <TableColumn text="%columnY" prefWidth="60"/>
+                                    <TableColumn text="%columnCreationDate" prefWidth="120"/>
+                                    <TableColumn text="%columnArea" prefWidth="60"/>
+                                    <TableColumn text="%columnRooms" prefWidth="60"/>
+                                    <TableColumn text="%columnFurnish" prefWidth="80"/>
+                                    <TableColumn text="%columnView" prefWidth="80"/>
+                                    <TableColumn text="%columnTransport" prefWidth="80"/>
+                                    <TableColumn text="%columnHouseName" prefWidth="160"/>
+                                    <TableColumn text="%columnHouseYear" prefWidth="80"/>
+                                    <TableColumn text="%columnLifts" prefWidth="50"/>
                                 </columns>
                             </TableView>
 
                             <VBox spacing="10" style="-fx-padding: 10;">
-                                <Label text="Действия" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                                <Label fx:id="actionsLabel" text="%actionsLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
 
                                 <ScrollPane fitToWidth="true">
                                     <VBox spacing="12" style="-fx-padding: 10;" fillWidth="true">
 
                                         <HBox spacing="5">
-                                            <Label text="Remove By ID:" prefWidth="160"/>
+                                            <Label fx:id="removeByIdLabel" text="%removeByIdLabel" prefWidth="160"/>
                                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                                <TextField fx:id="removeIdField" promptText="ID" prefWidth="160"/>
-                                                <Button text="Выполнить" prefWidth="160" onAction="#onRemoveById"/>
+                                                <TextField fx:id="removeIdField" promptText="%idPrompt" prefWidth="160"/>
+                                                <Button fx:id="removeByIdButton" text="%executeButton" prefWidth="160" onAction="#onRemoveById"/>
                                             </HBox>
                                         </HBox>
 
                                         <HBox spacing="5">
-                                            <Label text="Remove Any By View:" prefWidth="160"/>
+                                            <Label fx:id="removeAnyByViewLabel" text="%removeAnyByViewLabel" prefWidth="160"/>
                                             <HBox spacing="10" alignment="CENTER_LEFT">
                                                 <ChoiceBox fx:id="viewChoiceBox" prefWidth="160"/>
-                                                <Button text="Выполнить" prefWidth="160" onAction="#onRemoveAnyByView"/>
+                                                <Button fx:id="removeAnyByViewButton" text="%executeButton" prefWidth="160" onAction="#onRemoveAnyByView"/>
                                             </HBox>
                                         </HBox>
 
                                         <HBox spacing="5">
-                                            <Label text="Count Greater Than Furnish:" prefWidth="160"/>
+                                            <Label fx:id="countGreaterThanFurnishLabel" text="%countGreaterThanFurnishLabel" prefWidth="160"/>
                                             <HBox spacing="10" alignment="CENTER_LEFT">
                                                 <ChoiceBox fx:id="furnishChoiceBox" prefWidth="160"/>
-                                                <Button text="Выполнить" prefWidth="160" onAction="#onCountGreaterThanFurnish"/>
+                                                <Button fx:id="countGreaterThanFurnishButton" text="%executeButton" prefWidth="160" onAction="#onCountGreaterThanFurnish"/>
                                             </HBox>
                                         </HBox>
 
                                         <HBox spacing="5">
-                                            <Label text="Execute Script:" prefWidth="160"/>
+                                            <Label fx:id="executeScriptLabel" text="%executeScriptLabel" prefWidth="160"/>
                                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                                <TextField fx:id="scriptPathField" promptText="Путь" prefWidth="160"/>
-                                                <Button text="..." onAction="#onChooseScriptFile" prefWidth="30"/>
-                                                <Button text="Выполнить" prefWidth="125" onAction="#onExecuteScript"/>
+                                                <TextField fx:id="scriptPathField" promptText="%pathPrompt" prefWidth="160"/>
+                                                <Button fx:id="chooseScriptFileButton" onAction="#onChooseScriptFile" prefWidth="30"/>
+                                                <Button fx:id="executeScriptButton" text="%executeButton" prefWidth="125" onAction="#onExecuteScript"/>
                                             </HBox>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Add" prefWidth="160"/>
-                                            <Button text="Ввести квартиру" onAction="#openFlatForm" userData="add" prefWidth="160"/>
+                                            <Label fx:id="addLabel" text="%addLabel" prefWidth="160"/>
+                                            <Button fx:id="addFlatButton" text="%enterFlatButton" onAction="#openFlatForm" userData="add" prefWidth="160"/>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Add If Max" prefWidth="160"/>
-                                            <Button text="Ввести квартиру" onAction="#openFlatForm" userData="add_if_max" prefWidth="160"/>
+                                            <Label fx:id="addIfMaxLabel" text="%addIfMaxLabel" prefWidth="160"/>
+                                            <Button fx:id="addIfMaxButton" text="%enterFlatButton" onAction="#openFlatForm" userData="add_if_max" prefWidth="160"/>
                                         </HBox>
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Remove Lower" prefWidth="160"/>
-                                            <Button text="Ввести квартиру" onAction="#openFlatForm" userData="remove_lower" prefWidth="160"/>
-                                        </HBox>
-
-                                        <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Help" prefWidth="160"/>
-                                            <Button text="Выполнить" onAction="#onCommand" userData="help" prefWidth="160"/>
+                                            <Label fx:id="removeLowerLabel" text="%removeLowerLabel" prefWidth="160"/>
+                                            <Button fx:id="removeLowerButton" text="%enterFlatButton" onAction="#openFlatForm" userData="remove_lower" prefWidth="160"/>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Clear" prefWidth="160"/>
-                                            <Button text="Выполнить" onAction="#onCommand" userData="clear" prefWidth="160"/>
+                                            <Label fx:id="helpLabel" text="%helpLabel" prefWidth="160"/>
+                                            <Button fx:id="helpButton" text="%executeButton" onAction="#onCommand" userData="help" prefWidth="160"/>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Count By Furnish" prefWidth="160"/>
-                                            <Button text="Выполнить" onAction="#onCommand" userData="count_by_furnish" prefWidth="160"/>
+                                            <Label fx:id="clearLabel" text="%clearLabel" prefWidth="160"/>
+                                            <Button fx:id="clearButton" text="%executeButton" onAction="#onCommand" userData="clear" prefWidth="160"/>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="History" prefWidth="160"/>
-                                            <Button text="Выполнить" onAction="#onCommand" userData="history" prefWidth="160"/>
+                                            <Label fx:id="countByFurnishLabel" text="%countByFurnishLabel" prefWidth="160"/>
+                                            <Button fx:id="countByFurnishButton" text="%executeButton" onAction="#onCommand" userData="count_by_furnish" prefWidth="160"/>
                                         </HBox>
 
                                         <HBox spacing="5" alignment="CENTER_LEFT">
-                                            <Label text="Info" prefWidth="160"/>
-                                            <Button text="Выполнить" onAction="#onCommand" userData="info" prefWidth="160"/>
+                                            <Label fx:id="historyLabel" text="%historyLabel" prefWidth="160"/>
+                                            <Button fx:id="historyButton" text="%executeButton" onAction="#onCommand" userData="history" prefWidth="160"/>
+                                        </HBox>
+
+                                        <HBox spacing="5" alignment="CENTER_LEFT">
+                                            <Label fx:id="infoLabel" text="%infoLabel" prefWidth="160"/>
+                                            <Button fx:id="infoButton" text="%executeButton" onAction="#onCommand" userData="info" prefWidth="160"/>
                                         </HBox>
 
                                     </VBox>

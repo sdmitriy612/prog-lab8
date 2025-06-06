@@ -101,7 +101,6 @@ public class FlatInfoController {
     private void onEditFlat(ActionEvent event) {
         if (onEditCallback != null && currentFlat != null) {
             onEditCallback.accept(currentFlat);
-            // Optionally: close this information window after launching the editor
             ((Stage)((Button)event.getSource()).getScene().getWindow()).close();
         }
     }

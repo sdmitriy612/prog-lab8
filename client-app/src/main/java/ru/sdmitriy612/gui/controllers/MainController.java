@@ -31,6 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,11 +47,13 @@ public class MainController {
 
     @FXML private Label currentUserLabel;
     @FXML private TableView<Flat> flatsTable;
-    @FXML private Pane visualizationPane; // Этот Pane должен быть определен в FXML
+    @FXML private Pane visualizationPane;
+
+    @FXML private ChoiceBox<String> languageChoiceBox;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
-    private List<Flat> allFlats = List.of();  // Все квартиры после /show
+    private List<Flat> allFlats = List.of();
 
     @FXML private TextField removeIdField;
     @FXML private ChoiceBox<View> viewChoiceBox;
@@ -69,13 +74,42 @@ public class MainController {
     @FXML private TextField filterHouseYearField;
     @FXML private TextField filterHouseLiftsField;
     @FXML private TextField filterOwnerIdField;
-    @FXML private BorderPane mainPane; // ДОБАВЛЕНО: убедитесь, что это поле связано в FXML!
+    @FXML private BorderPane mainPane;
 
-    private FlatCanvas flatCanvas; // Сделано снова приватным полем без @FXML для ручной инициализации
-    private Stage flatInfoStage; // Добавлен для переиспользования окна информации
+    private FlatCanvas flatCanvas;
+    private Stage flatInfoStage;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private static final int AUTO_REFRESH_INTERVAL_SECONDS = 5;
+    private static final int AUTO_REFRESH_INTERVAL_SECONDS = 10;
+
+    private static final ObjectProperty<Locale> currentLocaleProperty = new SimpleObjectProperty<>(Locale.getDefault());
+
+    private static final Map<String, Locale> supportedLocales = Map.of(
+            getLocalizedMessageStatic("ru_RU"), new Locale("ru", "RU"),
+            getLocalizedMessageStatic("fi_FI"), new Locale("fi", "FI"),
+            getLocalizedMessageStatic("it_IT"), new Locale("it", "IT"),
+            getLocalizedMessageStatic("es_NI"), new Locale("es", "NI")
+    );
+
+
+    private static String getLocalizedMessageStatic(String key) {
+        return ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", Locale.getDefault()).getString(key);
+    }
+
+    private String getLocalizedMessage(String key) {
+        return ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocaleProperty.get()).getString(key);
+    }
+
+
+    public static Parent loadMainView(Locale initialLocale) throws IOException {
+        currentLocaleProperty.set(initialLocale);
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainController.class.getResource("/ru/sdmitriy612/gui/fxml/main_window.fxml"));
+
+        fxmlLoader.setResources(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", initialLocale));
+
+        return fxmlLoader.load();
+    }
 
     /**
      * Initializes the controller. This method is called after the FXML file has been loaded.
@@ -85,22 +119,47 @@ public class MainController {
      */
     @FXML
     private void initialize() {
-
-        currentUserLabel.textProperty().bind(new SimpleStringProperty(Session.getInstance().getUserAuthorization().login()));
+        currentUserLabel.setText(Session.getInstance().getUserAuthorization().login());
 
         flatCanvas = new FlatCanvas();
         visualizationPane.getChildren().add(flatCanvas);
-        // Привязка FlatCanvas к размерам visualizationPane
         AnchorPane.setTopAnchor(flatCanvas, 0.0);
         AnchorPane.setBottomAnchor(flatCanvas, 0.0);
         AnchorPane.setLeftAnchor(flatCanvas, 0.0);
         AnchorPane.setRightAnchor(flatCanvas, 0.0);
 
-        // Установка коллбэка для FlatCanvas для открытия окна информации
         flatCanvas.setOnFlatSelectedForInfo(this::openFlatInfoDialog);
 
         setupTableColumns();
-        executeCommand("/show", null);
+
+        List<String> displayNames = new ArrayList<>(supportedLocales.keySet());
+        languageChoiceBox.setItems(FXCollections.observableArrayList(displayNames));
+
+
+        String currentLangDisplayName = supportedLocales.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(currentLocaleProperty.get()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(getLocalizedMessage("ru_RU")); // Дефолтное значение, если текущий язык не найден
+
+        languageChoiceBox.setValue(currentLangDisplayName);
+
+        languageChoiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(oldVal)) {
+                Locale newLocale = supportedLocales.get(newVal);
+                if (newLocale != null && !newLocale.equals(currentLocaleProperty.get())) {
+                    currentLocaleProperty.set(newLocale);
+                    try {
+                        Stage stage = (Stage) mainPane.getScene().getWindow();
+                        Parent root = MainController.loadMainView(newLocale);
+                        stage.setScene(new Scene(root));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
         viewChoiceBox.setItems(FXCollections.observableArrayList(View.values()));
         furnishChoiceBox.setItems(FXCollections.observableArrayList(Furnish.values()));
 
@@ -125,22 +184,19 @@ public class MainController {
         );
 
         filterFields.forEach(field -> {
-            if (field != null) {
-                field.textProperty().addListener(
-                        (observable, oldValue, newValue) -> filterAndRender()
-                );
-            }
+            field.textProperty().addListener(
+                    (observable, oldValue, newValue) -> filterAndRender()
+            );
         });
 
         Platform.runLater(() -> {
             Stage stage = (Stage) mainPane.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
                 if (!scheduledExecutorService.isShutdown()) {
-                    scheduledExecutorService.shutdownNow(); // Принудительно завершаем все задачи
-                    System.out.println("Background Executor stopped.");
+                    scheduledExecutorService.shutdownNow();
+                    System.exit(0);
                 }
             });
-
         });
     }
 
@@ -154,7 +210,7 @@ public class MainController {
         if (idText.matches("\\d+")) {
             executeCommand("/remove_by_id " + idText, null);
         } else {
-            showAlert("Invalid ID. Please enter a number.", true);
+            showAlert(getLocalizedMessage("invalidId"), true);
         }
     }
 
@@ -166,9 +222,9 @@ public class MainController {
     private void onRemoveAnyByView() {
         View selectedView = viewChoiceBox.getValue();
         if (selectedView != null) {
-            executeCommand("/remove_any_by_view " + selectedView.toString(), null);
+            executeCommand("/remove_any_by_view " + selectedView, null);
         } else {
-            showAlert("Please select a View to remove.", true);
+            showAlert(getLocalizedMessage("selectViewPrompt"), true);
         }
     }
 
@@ -182,7 +238,7 @@ public class MainController {
         if (selected != null) {
             executeCommand("/count_greater_than_furnish " + selected, null);
         } else {
-            showAlert("Please select a Furnish type to count.", true);
+            showAlert(getLocalizedMessage("selectFurnishPrompt"), true);
         }
     }
 
@@ -196,7 +252,7 @@ public class MainController {
         if (!path.isBlank()) {
             executeCommand("/execute_script " + path, null);
         } else {
-            showAlert("Script path cannot be empty.", true);
+            showAlert(getLocalizedMessage("scriptPathEmpty"), true);
         }
     }
 
@@ -206,47 +262,48 @@ public class MainController {
      * and a cell value factory to extract the correct property from a {@link Flat} object.
      * Includes "Actions" column with "Update" and "Delete" buttons.
      */
+    @SuppressWarnings("unchecked")
     private void setupTableColumns() {
         flatsTable.getColumns().clear();
 
-        TableColumn<Flat, Long> idCol = new TableColumn<>("ID");
+        TableColumn<Flat, Long> idCol = new TableColumn<>(getLocalizedMessage("columnId"));
         idCol.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getId()).asObject());
 
-        TableColumn<Flat, String> nameCol = new TableColumn<>("Name");
+        TableColumn<Flat, String> nameCol = new TableColumn<>(getLocalizedMessage("columnName"));
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
 
-        TableColumn<Flat, Double> coordXCol = new TableColumn<>("X");
+        TableColumn<Flat, Double> coordXCol = new TableColumn<>(getLocalizedMessage("columnX"));
         coordXCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getCoordinates().x()).asObject());
 
-        TableColumn<Flat, Long> coordYCol = new TableColumn<>("Y");
+        TableColumn<Flat, Long> coordYCol = new TableColumn<>(getLocalizedMessage("columnY"));
         coordYCol.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getCoordinates().y()).asObject());
 
-        TableColumn<Flat, String> creationDateCol = new TableColumn<>("Creation Date");
+        TableColumn<Flat, String> creationDateCol = new TableColumn<>(getLocalizedMessage("columnCreationDate"));
         creationDateCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
 
-        TableColumn<Flat, Float> areaCol = new TableColumn<>("Area");
+        TableColumn<Flat, Float> areaCol = new TableColumn<>(getLocalizedMessage("columnArea"));
         areaCol.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getArea()).asObject());
 
-        TableColumn<Flat, Integer> roomsCol = new TableColumn<>("Number Of Rooms");
+        TableColumn<Flat, Integer> roomsCol = new TableColumn<>(getLocalizedMessage("columnRooms"));
         roomsCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getNumberOfRooms()).asObject());
 
-        TableColumn<Flat, String> furnishCol = new TableColumn<>("Furnish");
+        TableColumn<Flat, String> furnishCol = new TableColumn<>(getLocalizedMessage("columnFurnish"));
         furnishCol.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getFurnish() != null ? data.getValue().getFurnish().toString() : "")); // Изменено на пустую строку
+                data.getValue().getFurnish() != null ? data.getValue().getFurnish().toString() : ""));
 
-        TableColumn<Flat, String> viewCol = new TableColumn<>("View");
+        TableColumn<Flat, String> viewCol = new TableColumn<>(getLocalizedMessage("columnView"));
         viewCol.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getView() != null ? data.getValue().getView().toString() : "")); // Изменено на пустую строку
+                data.getValue().getView() != null ? data.getValue().getView().toString() : ""));
 
-        TableColumn<Flat, String> transportCol = new TableColumn<>("Transport");
+        TableColumn<Flat, String> transportCol = new TableColumn<>(getLocalizedMessage("columnTransport"));
         transportCol.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getTransport() != null ? data.getValue().getTransport().toString() : "")); // Изменено на пустую строку
+                data.getValue().getTransport() != null ? data.getValue().getTransport().toString() : ""));
 
-        TableColumn<Flat, String> houseNameCol = new TableColumn<>("House Name");
+        TableColumn<Flat, String> houseNameCol = new TableColumn<>(getLocalizedMessage("columnHouseName"));
         houseNameCol.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getHouse() != null ? data.getValue().getHouse().getName() : "")); // Изменено на пустую строку
+                data.getValue().getHouse() != null ? data.getValue().getHouse().getName() : ""));
 
-        TableColumn<Flat, Long> houseYearCol = new TableColumn<>("House Year");
+        TableColumn<Flat, Long> houseYearCol = new TableColumn<>(getLocalizedMessage("columnHouseYear"));
         houseYearCol.setCellValueFactory(data -> {
             if (data.getValue().getHouse() != null && data.getValue().getHouse().getYear() != null) {
                 return new SimpleLongProperty(data.getValue().getHouse().getYear()).asObject();
@@ -255,7 +312,7 @@ public class MainController {
             }
         });
 
-        TableColumn<Flat, Long> houseLiftsCol = new TableColumn<>("House Number Of Lifts");
+        TableColumn<Flat, Long> houseLiftsCol = new TableColumn<>(getLocalizedMessage("columnLifts"));
         houseLiftsCol.setCellValueFactory(data -> {
             if (data.getValue().getHouse() != null && data.getValue().getHouse().getNumberOfLifts() != null) {
                 return new SimpleLongProperty(data.getValue().getHouse().getNumberOfLifts()).asObject();
@@ -264,7 +321,7 @@ public class MainController {
             }
         });
 
-        TableColumn<Flat, String> userOwnerIdCol = new TableColumn<>("User Owner ID");
+        TableColumn<Flat, String> userOwnerIdCol = new TableColumn<>(getLocalizedMessage("columnUserOwnerId"));
         userOwnerIdCol.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getUserOwnerID())));
 
         flatsTable.getColumns().addAll(idCol, nameCol, coordXCol, coordYCol, creationDateCol,
@@ -276,7 +333,7 @@ public class MainController {
     }
 
     private TableColumn<Flat, Void> addActionsColumn() {
-        TableColumn<Flat, Void> actionsCol = new TableColumn<>("Actions");
+        TableColumn<Flat, Void> actionsCol = new TableColumn<>(getLocalizedMessage("columnActions"));
 
         actionsCol.setCellFactory(col -> new TableCell<>() {
             private final Button updateButton = new Button();
@@ -334,6 +391,7 @@ public class MainController {
      * it deserializes the new data and updates the table and canvas.
      *
      * @param command The command string to execute.
+     * @param flatBuilder {@link FlatBuilder} to handle command with flat interaction
      */
     private void executeCommand(String command, FlatBuilder flatBuilder) {
         scheduledExecutorService.execute(() -> {
@@ -345,7 +403,7 @@ public class MainController {
                         allFlats = objectMapper.readValue(response.message(), new TypeReference<List<Flat>>() {});
                         filterAndRender();
                     } catch (Exception e) {
-                        System.err.println("JSON parsing error for command '" + command + "': " + e.getMessage());
+                        System.err.println(getLocalizedMessage("jsonParsingError") + command + "': " + e.getMessage());
                     }
                 } else if(response.responseType() == ResponseType.COLLECTION_UPDATE) {
                     executeCommand("/show", null);
@@ -360,11 +418,11 @@ public class MainController {
     @FXML
     private void onChooseScriptFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Выберите файл скрипта");
+        fileChooser.setTitle(getLocalizedMessage("chooseScriptFileTitle"));
 
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt", "*.sh", "*.bat"),
-                new FileChooser.ExtensionFilter("All Files", "*.*")
+                new FileChooser.ExtensionFilter(getLocalizedMessage("textFiles"), "*.txt", "*.sh", "*.bat"),
+                new FileChooser.ExtensionFilter(getLocalizedMessage("allFiles"), "*.*")
         );
 
         Stage stage = (Stage) mainPane.getScene().getWindow();
@@ -385,7 +443,7 @@ public class MainController {
     private void showAlert(String message, boolean isError){
         Alert.AlertType alertType = isError ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION;
         Alert alert = new Alert(alertType);
-        alert.setTitle(isError ? "Ошибка сервера" : "Ответ сервера"); // Изменяем заголовок в зависимости от типа
+        alert.setTitle(isError ? getLocalizedMessage("serverErrorTitle") : getLocalizedMessage("serverResponseTitle"));
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
@@ -404,11 +462,12 @@ public class MainController {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui/fxml/flat_form.fxml"));
+            loader.setResources(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocaleProperty.get()));
             Parent root = loader.load();
 
             FlatFormController controller = loader.getController();
             Stage stage = new Stage();
-            stage.setTitle("Add Flat");
+            stage.setTitle(getLocalizedMessage("addFlatTitle"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -420,7 +479,6 @@ public class MainController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error loading flat form: " + e.getMessage(), true);
         }
     }
 
@@ -435,13 +493,15 @@ public class MainController {
     private void openFlatUpdateForm(Flat flat) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui/fxml/flat_form.fxml"));
+            loader.setResources(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocaleProperty.get()));
+
             Parent root = loader.load();
 
             FlatFormController controller = loader.getController();
             controller.setFlatToUpdate(flat);
 
             Stage stage = new Stage();
-            stage.setTitle("Update Flat");
+            stage.setTitle(getLocalizedMessage("updateFlatTitle"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -453,7 +513,6 @@ public class MainController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error loading flat update form: " + e.getMessage(), true);
         }
     }
 
@@ -461,13 +520,13 @@ public class MainController {
      * Opens a dialog window to display detailed information about a {@link Flat}.
      * The dialog includes an "Edit" button that will call {@link #openFlatUpdateForm(Flat)}
      * for the displayed flat.
-     * The dialog is non-modal, allowing interaction with the main window.
      *
      * @param flat The {@link Flat} object for which to display information.
      */
     private void openFlatInfoDialog(Flat flat) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui//fxml/flat_info_dialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui/fxml/flat_info_dialog.fxml"));
+            fxmlLoader.setResources(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocaleProperty.get()));
             Parent root = fxmlLoader.load();
             FlatInfoController controller = fxmlLoader.getController();
             controller.setFlat(flat);
@@ -476,12 +535,12 @@ public class MainController {
 
             if (flatInfoStage == null) {
                 flatInfoStage = new Stage();
-                flatInfoStage.setTitle("Flat Information");
+                flatInfoStage.setTitle(getLocalizedMessage("flatInformationTitle"));
                 flatInfoStage.initModality(Modality.NONE);
                 flatInfoStage.setScene(new Scene(root));
             } else {
                 flatInfoStage.getScene().setRoot(root);
-                flatInfoStage.setTitle("Flat Information: " + flat.getName());
+                flatInfoStage.setTitle(getLocalizedMessage("flatInformationTitle") + ": " + flat.getName());
             }
 
             flatInfoStage.show();
@@ -491,7 +550,7 @@ public class MainController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error loading flat information window: " + e.getMessage(), true);
+            showAlert(getLocalizedMessage("errorLoadingFlatInfoWindow") + e.getMessage(), true);
         }
     }
 

@@ -6,6 +6,9 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import ru.sdmitriy612.clientapp.Session;
+import ru.sdmitriy612.gui.controllers.MainController;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class Main extends Application {
 
@@ -19,11 +22,17 @@ public class Main extends Application {
 
     private void showAuthWindow() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui/fxml/auth_window.fxml"));
+
+        Locale currentLocale = Locale.getDefault();
+        loader.setResources(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocale));
+
         Scene scene = new Scene(loader.load());
         Stage authStage = new Stage();
-        authStage.setTitle("Flat Collector - Authorization");
+
+        authStage.setTitle(ResourceBundle.getBundle("ru.sdmitriy612.gui.localization.Messages", currentLocale).getString("authStageTitle"));
+
         authStage.setScene(scene);
-        authStage.initModality(Modality.APPLICATION_MODAL); // модальное окно
+        authStage.initModality(Modality.APPLICATION_MODAL);
         authStage.showAndWait();
 
         if (Session.getInstance().getUserAuthorization() != null) {
@@ -34,8 +43,9 @@ public class Main extends Application {
     }
 
     private void showMainWindow() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ru/sdmitriy612/gui/fxml/main_window.fxml"));
-        Scene scene = new Scene(loader.load(), 800, 600);
+
+        Scene scene = new Scene(MainController.loadMainView(Locale.getDefault()), 800, 600);
+
         primaryStage.setTitle("Flat Collector");
         primaryStage.setScene(scene);
         primaryStage.show();

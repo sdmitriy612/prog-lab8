@@ -10,7 +10,7 @@
       alignment="TOP_LEFT"
       style="-fx-padding: 20; -fx-background-color: #f8f8f8;">
 
-    <Label text="Flat Information" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <Label text="%flatInfoTitle" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
 
     <GridPane hgap="10" vgap="5">
         <columnConstraints>
@@ -18,37 +18,37 @@
             <ColumnConstraints hgrow="ALWAYS"/>
         </columnConstraints>
 
-        <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label text="%columnId:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
         <Label fx:id="idLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-        <Label text="Name:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Label text="%columnName:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <Label fx:id="nameLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="Coordinates:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <Label text="%coordinates:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
         <Label fx:id="coordinatesLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Label text="Creation Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <Label text="%columnCreationDate:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
         <Label fx:id="creationDateLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="Area:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <Label text="%columnArea:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
         <Label fx:id="areaLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-        <Label text="Number Of Rooms:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <Label text="%columnRooms:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <Label fx:id="numberOfRoomsLabel" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-        <Label text="Furnish:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <Label text="%columnFurnish:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
         <Label fx:id="furnishLabel" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-        <Label text="View:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <Label text="%columnView:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
         <Label fx:id="viewLabel" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
 
-        <Label text="Transport:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <Label text="%columnTransport:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
         <Label fx:id="transportLabel" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
 
-        <Label text="User Owner ID:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <Label text="%columnUserOwnerId:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
         <Label fx:id="ownerIdLabel" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
 
-        <Label text="House:" GridPane.rowIndex="10" GridPane.columnIndex="0" GridPane.valignment="TOP" />
+        <Label text="%columnHouse:" GridPane.rowIndex="10" GridPane.columnIndex="0" GridPane.valignment="TOP" />
         <VBox GridPane.rowIndex="10" GridPane.columnIndex="1" fx:id="houseInfoContainer" spacing="2">
             <Label fx:id="houseNameLabel"/>
             <Label fx:id="houseYearLabel"/>
@@ -57,7 +57,7 @@
     </GridPane>
 
     <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
-        <Button text="Edit" onAction="#onEditFlat"/>
-        <Button text="Close" onAction="#onClose"/>
+        <Button text="%editButton" onAction="#onEditFlat"/>
+        <Button text="%closeButton" onAction="#onClose"/>
     </HBox>
 </VBox>

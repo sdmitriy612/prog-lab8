@@ -13,20 +13,20 @@
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
 
-    <Label text="Вход в систему"
+    <Label text="%authTitle"
            style="-fx-font-size: 18px; -fx-font-weight: bold;" />
 
     <TextField fx:id="usernameField"
-               promptText="Имя пользователя"
+               promptText="%authUsernamePrompt"
                maxWidth="250" />
 
     <PasswordField fx:id="passwordField"
-                   promptText="Пароль"
+                   promptText="%authPasswordPrompt"
                    maxWidth="250" />
 
     <HBox spacing="10" alignment="CENTER">
-        <Button text="Войти" onAction="#onCommand" userData="signin"/>
-        <Button text="Регистрация" onAction="#onCommand" userData="signup"/>
+        <Button text="%authLoginButton" onAction="#onCommand" userData="signin"/>
+        <Button text="%authRegisterButton" onAction="#onCommand" userData="signup"/>
     </HBox>
 
     <Label fx:id="messageLabel"

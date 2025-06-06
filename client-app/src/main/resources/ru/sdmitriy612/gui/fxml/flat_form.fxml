@@ -7,26 +7,26 @@
 <VBox xmlns:fx="http://javafx.com/fxml" spacing="10" style="-fx-padding: 20;" alignment="TOP_LEFT"
       fx:controller="ru.sdmitriy612.gui.controllers.FlatFormController">
 
-    <Label text="Ввести квартиру" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+    <Label text="%formTitle" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
 
     <GridPane hgap="10" vgap="10">
 
-        <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="Введите имя квартиры"/>
+        <Label text="%formNameLabel" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="%formNamePrompt"/>
 
-        <Label text="X (Coordinates):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="coordXField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Число (макс 497)"/>
+        <Label text="%formXLabel" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="coordXField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="%formXPrompt"/>
 
-        <Label text="Y (Coordinates):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <TextField fx:id="coordYField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Число (> -738)"/>
+        <Label text="%formYLabel" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="coordYField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="%formYPrompt"/>
 
-        <Label text="Area:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <TextField fx:id="areaField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Площадь (> 0)"/>
+        <Label text="%formAreaLabel" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="areaField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="%formAreaPrompt"/>
 
-        <Label text="Number of Rooms:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <TextField fx:id="roomsField" GridPane.rowIndex="4" GridPane.columnIndex="1" promptText="Кол-во комнат (1-20)"/>
+        <Label text="%formRoomsLabel" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="roomsField" GridPane.rowIndex="4" GridPane.columnIndex="1" promptText="%formRoomsPrompt"/>
 
-        <Label text="Furnish:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <Label text="%formFurnishLabel" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <ChoiceBox fx:id="furnishChoice" GridPane.rowIndex="5" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
@@ -38,7 +38,7 @@
             </items>
         </ChoiceBox>
 
-        <Label text="View:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <Label text="%formViewLabel" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
         <ChoiceBox fx:id="viewChoice" GridPane.rowIndex="6" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
@@ -51,7 +51,7 @@
             </items>
         </ChoiceBox>
 
-        <Label text="Transport:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <Label text="%formTransportLabel" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
         <ChoiceBox fx:id="transportChoice" GridPane.rowIndex="7" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
@@ -62,20 +62,20 @@
             </items>
         </ChoiceBox>
 
-        <Label text="House Name:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-        <TextField fx:id="houseNameField" GridPane.rowIndex="8" GridPane.columnIndex="1" promptText="Название дома"/>
+        <Label text="%formHouseNameLabel" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <TextField fx:id="houseNameField" GridPane.rowIndex="8" GridPane.columnIndex="1" promptText="%formHouseNamePrompt"/>
 
-        <Label text="House Year:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
-        <TextField fx:id="houseYearField" GridPane.rowIndex="9" GridPane.columnIndex="1" promptText="Год постройки (> 0)"/>
+        <Label text="%formHouseYearLabel" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <TextField fx:id="houseYearField" GridPane.rowIndex="9" GridPane.columnIndex="1" promptText="%formHouseYearPrompt"/>
 
-        <Label text="Number of Lifts:" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
-        <TextField fx:id="liftsField" GridPane.rowIndex="10" GridPane.columnIndex="1" promptText="Кол-во лифтов (> 0)"/>
+        <Label text="%formLiftsLabel" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
+        <TextField fx:id="liftsField" GridPane.rowIndex="10" GridPane.columnIndex="1" promptText="%formLiftsPrompt"/>
 
     </GridPane>
 
     <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
-        <Button text="Сохранить" onAction="#onSave"/>
-        <Button text="Отмена" onAction="#onCancel"/>
+        <Button text="%formSaveButton" onAction="#onSave"/>
+        <Button text="%formCancelButton" onAction="#onCancel"/>
     </HBox>
 
 </VBox>

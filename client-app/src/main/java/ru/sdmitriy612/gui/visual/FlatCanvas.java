@@ -24,7 +24,6 @@ public class FlatCanvas extends Pane {
 
     /**
      * Map storing {@link FlatDisplayObject} instances, keyed by their Flat ID.
-     * This serves as the primary source of truth for currently displayed flats.
      */
     private final Map<Long, FlatDisplayObject> flatDisplayObjectMap = new HashMap<>();
     /**
@@ -38,10 +37,9 @@ public class FlatCanvas extends Pane {
      */
     private Consumer<Flat> onFlatSelectedForInfo;
 
-    // Constants for drawing
     private static final double WORLD_TO_CANVAS_SCALE = 6.0;
-    private static final double CANVAS_CENTER_X = 200; // Adjust these values for your UI layout
-    private static final double CANVAS_CENTER_Y = 450; // Adjust these values for your UI layout
+    private static final double CANVAS_CENTER_X = 200;
+    private static final double CANVAS_CENTER_Y = 450;
     private static final Color AXIS_COLOR = Color.GRAY;
     private static final double AXIS_LINE_WIDTH = 1.5;
     private static final double TICK_MARK_LENGTH = 5;
@@ -105,30 +103,26 @@ public class FlatCanvas extends Pane {
      * @return The {@link Flat} object that was clicked, or {@code null} if no flat was clicked.
      */
     private Flat detectClickedFlat(double mouseX, double mouseY) {
-        // Iterate in reverse order, as the last drawn objects are "on top"
-        // and should be prioritized if they overlap.
+
         List<FlatDisplayObject> currentObjects = new ArrayList<>(flatDisplayObjects);
-        // Sort in reverse order of scale to prioritize larger, more visible objects for clicking.
         currentObjects.sort(Comparator.comparingDouble((FlatDisplayObject fdo) -> fdo.scaleProperty.get()).reversed());
 
         for (FlatDisplayObject fdo : currentObjects) {
             Flat flat = fdo.flat;
 
-            // Use animated coordinates and scale to calculate the current position and size of the circle
             double centerX = worldToCanvasX(fdo.currentX.get());
             double centerY = worldToCanvasY(fdo.currentY.get());
             double radius = FlatDisplayObject.MIN_FLAT_RADIUS + (Math.sqrt(flat.getArea()) * FlatDisplayObject.BASE_RADIUS_MULTIPLIER);
-            radius *= fdo.scaleProperty.get(); // Apply current animation scale
+            radius *= fdo.scaleProperty.get();
 
-            if (radius > 50) radius = 50; // Radius cap
+            if (radius > 50) radius = 50;
 
-            // Check if the click point is inside the circle
             double distance = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
             if (distance <= radius) {
-                return flat; // Found the clicked object
+                return flat;
             }
         }
-        return null; // No object was clicked
+        return null;
     }
 
 
@@ -147,36 +141,26 @@ public class FlatCanvas extends Pane {
         Map<Long, Flat> newFlatsMap = newFlats.stream()
                 .collect(Collectors.toMap(Flat::getId, flat -> flat));
 
-        // Identify removed objects and start their disappearance animation
-        Iterator<Map.Entry<Long, FlatDisplayObject>> iterator = flatDisplayObjectMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Long, FlatDisplayObject> entry = iterator.next();
+        for (Map.Entry<Long, FlatDisplayObject> entry : flatDisplayObjectMap.entrySet()) {
             FlatDisplayObject fdo = entry.getValue();
             if (!newFlatsMap.containsKey(fdo.flat.getId())) {
-                // Object removed - start animation. It will be removed from map on animation finish.
                 fdo.animateOut(() -> {
-                    // This callback runs AFTER the animation finishes
-                    flatDisplayObjectMap.remove(fdo.flat.getId()); // Remove from map only after animation
+                    flatDisplayObjectMap.remove(fdo.flat.getId());
                 });
             }
         }
 
-        // Identify new and updated objects
         for (Flat newFlat : newFlats) {
             FlatDisplayObject existingDisplayObject = flatDisplayObjectMap.get(newFlat.getId());
             if (existingDisplayObject == null) {
-                // New flat: create and start appearance animation
                 FlatDisplayObject newDisplayObject = new FlatDisplayObject(newFlat);
                 newDisplayObject.animateIn();
                 flatDisplayObjectMap.put(newFlat.getId(), newDisplayObject);
             } else {
-                // Existing flat: update data and start change animations
                 existingDisplayObject.update(newFlat);
             }
         }
 
-        // Rebuild the flatDisplayObjects list to include all currently managed objects
-        // (including those animating out)
         flatDisplayObjects.clear();
         flatDisplayObjects.addAll(flatDisplayObjectMap.values());
     }
@@ -236,8 +220,8 @@ public class FlatCanvas extends Pane {
      * Draws the X and Y axes on the canvas, including tick marks and labels.
      */
     private void drawAxes() {
-        gc.setStroke(AXIS_COLOR);
-        gc.setLineWidth(AXIS_LINE_WIDTH);
+        gc.setStroke(Color.GRAY);
+        gc.setLineWidth(1.5);
         gc.setFont(new javafx.scene.text.Font(10));
 
         double originX_canvas = CANVAS_CENTER_X;
@@ -246,23 +230,17 @@ public class FlatCanvas extends Pane {
         gc.strokeLine(originX_canvas, 0, originX_canvas, canvas.getHeight());
         gc.strokeLine(0, originY_canvas, canvas.getWidth(), originY_canvas);
 
-        // Устанавливаем цвет текста на черный перед отрисовкой меток
         gc.setFill(Color.BLACK);
         drawAxisTicksAndLabels(originX_canvas, originY_canvas);
 
-        // Draw (0,0) label
         if (originX_canvas >= 0 && originX_canvas <= canvas.getWidth() &&
                 originY_canvas >= 0 && originY_canvas <= canvas.getHeight()) {
             gc.fillText("(0,0)", originX_canvas + TICK_LABEL_OFFSET, originY_canvas + TICK_LABEL_OFFSET);
         }
 
-        // Draw arrows on axes
-        // Цвет стрелок осей должен быть AXIS_COLOR (серый), поэтому переустанавливаем его
-        gc.setStroke(AXIS_COLOR);
         gc.strokeLine(canvas.getWidth() - 10, originY_canvas, canvas.getWidth(), originY_canvas);
         gc.strokeLine(canvas.getWidth() - 10, originY_canvas - 5, canvas.getWidth(), originY_canvas);
         gc.strokeLine(canvas.getWidth() - 10, originY_canvas + 5, canvas.getWidth(), originY_canvas);
-        // Y-axis arrow
         gc.strokeLine(originX_canvas, 10, originX_canvas, 0);
         gc.strokeLine(originX_canvas - 5, 10, originX_canvas, 0);
         gc.strokeLine(originX_canvas + 5, 10, originX_canvas, 0);
@@ -278,7 +256,6 @@ public class FlatCanvas extends Pane {
         double worldTickIntervalX = roundToNearestNiceNumber(DESIRED_TICK_PIXEL_INTERVAL / WORLD_TO_CANVAS_SCALE);
         double worldTickIntervalY = roundToNearestNiceNumber(DESIRED_TICK_PIXEL_INTERVAL / WORLD_TO_CANVAS_SCALE);
 
-        // X-axis ticks
         double startWorldX = (0 - CANVAS_CENTER_X) / WORLD_TO_CANVAS_SCALE;
         double endWorldX = (canvas.getWidth() - CANVAS_CENTER_X) / WORLD_TO_CANVAS_SCALE;
 
@@ -286,14 +263,13 @@ public class FlatCanvas extends Pane {
              val <= endWorldX + worldTickIntervalX;
              val += worldTickIntervalX) {
             double tickCanvasX = worldToCanvasX(val);
-            if (Math.abs(val) > Double.MIN_NORMAL) { // Avoid drawing zero twice
+            if (Math.abs(val) > Double.MIN_NORMAL) {
                 gc.strokeLine(tickCanvasX, originY_canvas - TICK_MARK_LENGTH / 2,
                         tickCanvasX, originY_canvas + TICK_MARK_LENGTH / 2);
                 gc.fillText(String.format("%.0f", val), tickCanvasX + 2, originY_canvas + TICK_LABEL_OFFSET);
             }
         }
 
-        // Y-axis ticks
         double startWorldY = (CANVAS_CENTER_Y - canvas.getHeight()) / WORLD_TO_CANVAS_SCALE;
         double endWorldY = (CANVAS_CENTER_Y - 0) / WORLD_TO_CANVAS_SCALE;
 
@@ -301,7 +277,7 @@ public class FlatCanvas extends Pane {
              val <= endWorldY + worldTickIntervalY;
              val += worldTickIntervalY) {
             double tickCanvasY = worldToCanvasY(val);
-            if (Math.abs(val) > Double.MIN_NORMAL) { // Avoid drawing zero twice
+            if (Math.abs(val) > Double.MIN_NORMAL) {
                 gc.strokeLine(originX_canvas - TICK_MARK_LENGTH / 2, tickCanvasY,
                         originX_canvas + TICK_MARK_LENGTH / 2, tickCanvasY);
                 gc.fillText(String.format("%.0f", val), originX_canvas + TICK_LABEL_OFFSET, tickCanvasY + 4);
@@ -312,47 +288,38 @@ public class FlatCanvas extends Pane {
     /**
      * Draws the {@link Flat} data as circles on the canvas.
      * Objects are sorted by their current scale property to ensure proper overlap rendering
-     * (smaller scaled, disappearing objects are drawn first).
      */
     private void drawFlatsData() {
-        // Sort by scaleProperty so that objects with smaller scale (disappearing) are drawn first
-        // This prevents incorrect overlapping.
         List<FlatDisplayObject> objectsToDraw = new ArrayList<>(flatDisplayObjects);
         objectsToDraw.sort(Comparator.comparingDouble(fdo -> fdo.scaleProperty.get()));
-
 
         for (FlatDisplayObject displayObject : objectsToDraw) {
             Flat flat = displayObject.flat;
             double alpha = displayObject.alphaProperty.get();
-            double scale = displayObject.scaleProperty.get(); // Current object scale
+            double scale = displayObject.scaleProperty.get();
 
-            if (alpha <= 0.001 || scale <= 0.001) { // Don't draw if almost invisible
+            if (alpha <= 0.001 || scale <= 0.001) {
                 continue;
             }
 
-            // Use animated coordinates
             double x = worldToCanvasX(displayObject.currentX.get());
             double y = worldToCanvasY(displayObject.currentY.get());
-
             double radius = FlatDisplayObject.MIN_FLAT_RADIUS + (Math.sqrt(flat.getArea()) * FlatDisplayObject.BASE_RADIUS_MULTIPLIER);
-            // Apply animation scale to radius
             radius *= scale;
 
             if (radius > 50) radius = 50;
 
-            Color color = FlatDisplayObject.colorFromId(flat.getUserOwnerID()); // Use static method from FlatDisplayObject
+            Color color = FlatDisplayObject.colorFromId(flat.getUserOwnerID());
 
             gc.setGlobalAlpha(alpha);
             gc.setFill(color);
             gc.setStroke(color.deriveColor(0, 1, 0.7, 1.0));
             gc.setLineWidth(1.0);
 
-            // Draw circle
             gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
             gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
 
-            // Flat names are omitted as requested.
         }
-        gc.setGlobalAlpha(1.0); // Reset global alpha after drawing
+        gc.setGlobalAlpha(1.0);
     }
 }
